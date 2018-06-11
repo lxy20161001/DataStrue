@@ -1,0 +1,55 @@
+
+
+#ifndef DATASTRUCT_LINKEDLISTSTACK_H
+#define DATASTRUCT_LINKEDLISTSTACK_H
+
+#include "../Stack/Stack.h"
+#include <iostream>
+#include "LinkedList.h"
+
+using namespace std;
+
+template <typename T>
+class LinkedListStack:public Stack<T> {
+private:
+    LinkedList<T>* list;
+
+public:
+    LinkedListStack(){
+        list = new LinkedList<T>();
+    }
+    ~LinkedListStack(){
+        delete list;
+    };
+
+    int getSize(){
+        return list->getSize();
+    }
+
+    bool isEmpty(){
+        return list->isEmpty();
+    }
+
+    void push(T e){
+        list->addFirst(e);
+    }
+
+    T pop(){
+        return list->removeFirst();
+    }
+
+    T peek(){
+        return list->getFrist();
+    }
+
+    void Print(){
+        list->PrintLinkedList();
+
+
+
+
+    }
+};
+
+
+#endif //DATASTRUCT_LINKEDLISTSTACK_H
