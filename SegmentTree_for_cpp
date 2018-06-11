@@ -1,0 +1,199 @@
+
+
+#ifndef SEGMENTTREE_SEGMENTTREE_H
+#define SEGMENTTREE_SEGMENTTREE_H
+
+#include <iostream>
+#include <functional>
+using namespace::std;
+
+
+template <typename T>
+class Merger{
+public:
+    virtual T merger(T a,T b){
+        return a+b;
+    };
+};
+
+template <typename T>
+class SegmentTree:public Merger<T>{
+private:
+    T *tree;//线段树的大小，原始数据的SIZE*4
+    T *data;//原始数据的大小
+    int size;
+    //Merger<T> *merge;
+    std::function<T(T, T)> func;
+public:
+    SegmentTree(T arr[],int size,std::function<T (T,T)> func){
+
+        //this->merge = merge;
+        this->func = func;
+        this->size = size;
+        data = new T[size]{};
+        for(int i = 0 ;i<size;++i){
+            data[i] = arr[i];
+        }
+
+        tree = new T[4*size]{};
+        buildSegementTree(0,0,size-1);//将原始数据的数据放入线段树
+    }
+
+    ~SegmentTree(){
+        //delete  merge;
+        delete[] data;
+        delete tree;
+        
+
+    }
+
+    int getSize(){
+        return size;
+    }
+
+    T get(int index){
+        if(index<0 || index>=size){
+            throw "index is illegal";
+        }
+        return data[index];
+
+
+    }
+
+private:
+    void buildSegementTree(int treeIndex,int l,int r){
+        if(l == r){
+            tree[treeIndex] = data[l];
+            return ;
+        }
+
+        int leftTreeIndex = leftChild(treeIndex);
+        int rightTreeIndex = rightChild(treeIndex);
+
+        int mid = l+(r-l)/2;
+
+        //rec
+        buildSegementTree(leftTreeIndex,l,mid);
+        buildSegementTree(rightTreeIndex,mid+1,r);
+
+        tree[treeIndex] = func(tree[leftTreeIndex],tree[rightTreeIndex]);
+    }
+
+private:
+    int leftChild(int index){
+        return 2*index + 1;
+    }
+    int rightChild(int index){
+        return 2*index + 2;
+    }
+
+
+public:
+    T query(int queryL,int queryR){
+        if(queryL<0 || queryL>=size || queryR< 0 || queryR >= size){
+            throw "Index is illegal";
+        }
+
+        return query(0,0,size-1,queryL,queryR);
+    }
+
+    T query(int treeIndex,int l,int r,int queryL,int queryR){
+        if(l == queryL && r == queryR){
+            return tree[treeIndex];
+        }
+
+        int leftTreeIndex = leftChild(treeIndex);
+        int rightTreeIndex = rightChild(treeIndex);
+
+        int mid = l+(r-l)/2;
+
+        if(queryL >= mid+1)
+            return query(rightTreeIndex,mid+1,r,queryL,queryR);
+        else if(queryR<=mid)
+            return query(leftTreeIndex,l,mid,queryL,queryR);
+
+        //区间分别在左右子树上，那么就必须遍历两边的子树
+        T leftResult = query(leftTreeIndex,l,mid,queryL,mid);
+        T rightResult = query(rightTreeIndex,mid+1,r,mid+1,queryR);
+
+        return func(leftResult,rightResult);//这是区间处于左右线段树中的跳出递归的方法
+
+    }
+
+    //将INDEX的值更新为e
+    void set(int index , T e){
+        if(index<0 || index>=size){
+            throw "index is illegal";
+        }
+        data[index] = e;
+        set(0,0,size-1,index,e);
+    }
+
+    void set(int treeIndex,int l,int r,int index,T e){
+        if(l == r){
+            tree[treeIndex] = e;
+            return ;
+        }
+
+
+        int leftTreeIndex = leftChild(treeIndex);
+        int rightTreeIndex = rightChild(treeIndex);
+
+        int mid = l+(r-l)/2;
+
+        if(index <=mid){
+            set(leftTreeIndex,l,mid,index,e);
+        }
+        else{
+            set(rightTreeIndex,mid+1,r,index,e);
+        }
+
+        tree[treeIndex] = func(tree[leftTreeIndex],tree[rightTreeIndex]);//更新因修改而产生父节点变化
+
+    }
+
+public:
+    void Print(){
+        cout<<" [ ";
+        for(int i = 0;i<size*4;++i){
+            if(tree[i]!=0)
+                cout<<tree[i]<<" ";
+            else
+                cout<<"Null"<<" ";
+
+            if(i<size*4-1)
+                cout<<",";
+
+        }
+        cout<<" ] ";
+    }
+};
+
+#endif //SEGMENTTREE_SEGMENTTREE_H
+
+//int main() {
+//    int *nums = new int[6]{-2, 0, 3, -5, 2, -1};
+//
+//    //Merger<int> *merger = new Merger<int>();
+//
+//    //SegmentTree<int> *segmentTree = new SegmentTree<int>(nums,6,merger);
+//
+//    std::function<int(int, int)> newLambda = [](int a, int b) -> int {
+//        cout<<a<<" "<<b<<" "<<endl;
+//        return a + b;
+//    };
+//
+//    SegmentTree<int> *segmentTree = new SegmentTree<int>(nums, 6, newLambda);
+//    cout<<segmentTree->query(2,5)<<endl;
+//
+//    segmentTree->Print();
+//
+//
+//    delete nums;
+//    delete segmentTree;
+//}
+
+
+
+
+
