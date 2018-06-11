@@ -1,0 +1,90 @@
+#include <Array>
+#include<iostream>
+#include<cstdio>
+#include<cstring>
+#include <string>
+#include<cmath>
+#include<cstdlib>
+#include<algorithm>
+#include "../Array/Array.h"
+
+
+#ifndef DATASTRUCT_STACK_H
+#define DATASTRUCT_STACK_H
+
+template <typename T>
+class Stack{
+public:
+    virtual int getSize(){};
+    virtual bool isEmpty(){};
+    virtual void push(T e){};
+    virtual T pop(){};
+    virtual T peek(){};
+};
+
+
+
+template <typename T>
+class ArrayStack:public Stack<T>{
+private:
+    int capacity;
+    Array<T>* array;//array用于实现stack的底层结构
+public:
+    ArrayStack(int capacity){
+        this->capacity = capacity;
+        array = new Array<T>(this->capacity);
+    }
+
+    ArrayStack(){
+        array = new Array<T>();
+    }
+
+    ~ArrayStack(){
+      delete[] array;
+    };
+public:
+    void push(T e){
+        array->addLast(e);
+    }
+
+    T pop(){
+        return array->RemoveLast();
+    }
+    T peek(){
+        return array->getLast();
+    }
+
+    int getSize(){
+        return array->getSize();
+    }
+
+    bool isEmpty(){
+        return array->isEmpty();
+    }
+
+    int getCapacity(){
+        return array->getCapacity();
+    }
+
+    void toString(){
+        int newSize = array->getSize();
+        int NewCapacity = 100;
+        std::string newdata[NewCapacity];
+        std::cout<<
+                 "Stact: "<<std::endl;
+        newdata[0]="[";
+        for(int i=0;i<newSize;i++){
+            newdata[i+1]=std::to_string(array->get(i));
+            if(i!=newSize-1){
+                newdata[i+1]=std::to_string(array->get(i))+", ";
+            }
+        }
+        newdata[newSize+1]="] top";
+        for(int i=0;i<newSize+2;i++){
+            std::cout<<newdata[i]<<" ";
+        }
+        std::cout<<""<<std::endl;
+    }
+};
+
+#endif //DATASTRUCT_STACK_H
