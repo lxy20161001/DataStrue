@@ -1,0 +1,130 @@
+
+
+#ifndef DATASTRUCT_LINKEDLISTQUEUE_H
+#define DATASTRUCT_LINKEDLISTQUEUE_H
+
+#include "../Queue/Queue.h"
+
+template <typename T>
+class LinkedListQueue:public Queue<T> {
+
+private:
+    class Node{
+    public:
+        Node* next;
+        T e;
+        Node(T e,Node *next){
+            this->next = next;
+            this->e = e;
+        }
+        Node(T e){
+            this->e=e;
+            this->next = NULL;
+        }
+
+        Node(){
+            this->e= NULL;
+            this->next = NULL;
+        }
+
+        ~Node(){
+            delete next;
+        }
+
+        string Print(){
+            return to_string(e);
+        }
+
+    };
+
+private:
+    Node *head,*tail;
+    int size;
+
+public:
+    LinkedListQueue(){
+        this->head = NULL;
+        this->tail = NULL;
+        size = 0;
+    }
+
+    ~LinkedListQueue(){
+        delete head;
+        delete tail;
+    }
+
+    int getSize(){
+        return size;
+    }
+
+    bool isEmpty(){
+        return size==0;
+    }
+
+    void enqueue(T e){//入队操作
+        if(tail == NULL){
+            tail = new Node(e);
+            head = tail;
+            //if tail==null,the head is null too~
+        }
+        else{
+            tail->next = new Node(e);
+            tail = tail->next;
+            //the new tail is tail next;
+        }
+
+        size++;
+    }
+
+    T dequeue(){
+        if(isEmpty()){
+            throw "The LinkList is Empty,Cannot Dequeue!";
+        }
+
+        Node *retNode = head;
+        head = head->next;
+        retNode->next = NULL;
+
+        if(head == NULL){
+            tail = NULL;//if head is null,the linkedlist is null,so the tail must be null!
+        }
+        size -- ;
+
+
+        return int(retNode->e);
+    }
+
+    T getFront(){
+        if(isEmpty()){
+            throw "The LinkList is Empty!";
+        }
+        return int(head->e);
+    }
+
+    void PrintLinkedQueue(){
+        std::string data[this->size+5];
+        Node* cur = head;
+        data[0] ="Queue:Front ";
+        int NewSize = 1;
+        while(cur!=NULL){
+            data[NewSize] = cur->Print()+"->";
+            cur = cur->next;
+            NewSize++;
+        }
+
+
+        data[this->size]="NULL tail";
+
+        for(int i = 0;i<this->size+2;i++){
+            cout<<data[i]<<"";
+
+        }
+        cout<<""<<endl;
+
+
+    }
+
+};
+
+
+#endif //DATASTRUCT_LINKEDLISTQUEUE_H
