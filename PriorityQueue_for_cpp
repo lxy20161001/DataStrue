@@ -1,0 +1,50 @@
+
+
+#ifndef HEAP_PRIORITYQUEUE_H
+#define HEAP_PRIORITYQUEUE_H
+
+#include "MaxHeap.h"
+
+template <typename T>
+class QueueInterFace{
+    virtual int getSize(){};
+    virtual bool isEmpty(){};
+    virtual void enqueue(T e){};
+    virtual T dequeue(){};
+    virtual T getFront(){};
+};
+
+template <typename T>
+class PriorityQueue:public QueueInterFace<T>{
+
+private:
+    MaxHeap<int> *maxHeap;
+
+public:
+    PriorityQueue(){
+        maxHeap = new MaxHeap<int>();
+    }
+
+    int getSize(){
+        return maxHeap->Size();
+    }
+
+    bool isEmpty(){
+        return maxHeap->isEmpty();
+    }
+
+    T getFront(){
+        return maxHeap->findMax();
+    }
+
+    void enqueue(T e){
+        maxHeap->add(e);
+    }
+
+    T dequeue(){
+        return maxHeap->extractMax();
+    }
+
+};
+
+#endif //HEAP_PRIORITYQUEUE_H
