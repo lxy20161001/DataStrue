@@ -1,0 +1,116 @@
+#ifndef DATASTRUCT_LOOPQUEUE_H
+#define DATASTRUCT_LOOPQUEUE_H
+
+#include "../Array/Array.h"
+#include "../Queue/Queue.h"
+
+template <typename T>
+class LoopQueue:public Queue<T> {
+private:
+
+    T* data;
+    int front,tail,capacity;
+    int size;
+
+public:
+    LoopQueue(int capacity){
+        this->capacity = capacity;
+        data = new T[this->capacity+1];//预留一个空位用判断数组是否满了
+        front = 0;
+        tail = 0;
+        size = 0;
+    }
+
+    LoopQueue(){
+        this->capacity = 10;
+        data = new T[this->capacity+1];
+        front = 0;
+        tail = 0;
+        size = 0;
+
+    }
+
+    ~LoopQueue(){
+        delete[] data;
+    }
+
+    int getCapacity(){
+        return capacity;
+    }
+
+    bool isEmpty(){
+        return front == tail;
+    }
+
+    int getSize(){
+        return size;
+    }
+
+    void enqueue(T e){
+        if((tail+1)% capacity == front){
+            int newSize = getCapacity()*2;
+            resize(newSize);
+        }
+
+        data[tail]=e;
+        tail = (tail+1) % (this->capacity+1);
+        size++;
+    }
+
+    T dequeue(){
+        if(isEmpty()){
+            throw "Cannot dequeue from an empty queue!";
+        }
+
+        T ret = data[front];
+        data[front] = NULL;
+        front = (front+1)% (this->capacity+1);
+        size --;
+        if(size == getCapacity()/4 && getCapacity()/2 != 0){
+            resize(getCapacity()/2);
+        }
+        return ret;
+    }
+
+    T getFront(){
+        if(isEmpty()){
+            throw "Queue is empty";
+        }
+        return data[front];
+    }
+
+    void Print(){
+        std::string newdata[this->capacity+5];
+        std::cout<<
+                 "Queue "+std::to_string(size)+
+                 ", capacity: "+std::to_string(getCapacity())<<std::endl;
+        newdata[0]="front [";
+        for(int i=front;i!=tail;i=(i+1)% (this->capacity +1)){
+            newdata[i+1]=std::to_string(data[i]);
+            if((i+1)%(this->capacity+1)!=tail){
+                newdata[i+1]=std::to_string(data[i])+", ";
+            }
+        }
+        newdata[size+1]="] tail";
+        for(int i=0;i<size+2;i++){
+            std::cout<<newdata[i]<<" ";
+        }
+        std::cout<<""<<std::endl;
+    }
+
+private:
+    void resize(int newCapacity){
+        T* newData = new T[newCapacity+1];
+        for(int i = 0;i<size;i++){
+            newData[i] = data[(i+front)% this->capacity];
+        }
+        data = newData;
+        front = 0;
+        tail = size;
+        this->capacity = newCapacity;
+    }
+
+};
+
+
+#endif //DATASTRUCT_LOOPQUEUE_H
