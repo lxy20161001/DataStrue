@@ -1,0 +1,340 @@
+
+
+#ifndef DATASTRUCT2_BST_H
+#define DATASTRUCT2_BST_H
+
+#include <iostream>
+#include <stack>
+#include <queue>
+
+
+using namespace::std;
+
+template <typename T>
+class BST{
+private:
+    class Node{
+    public:
+        T e;
+        Node *left;
+        Node *right;
+        Node(T e){
+            this->e = e;
+            this->left = this->right = NULL;
+        }
+        ~Node(){
+            delete left;
+            delete right;
+        };
+    };
+
+private:
+    int size;
+    Node *root;
+
+public:
+    BST(){
+        root = NULL;
+        size = 0;
+    }
+    ~BST(){
+        delete root;
+    };
+    int getSize(){
+        return size;
+    }
+    bool isEmpty(){
+        return size == 0;
+    }
+
+    void add(T e){
+        root = addRec(root,e);
+    }
+
+    Node* addRec(Node* node,T e){
+        if(node==NULL){
+            size++;
+            return new Node(e);
+        }
+        //以上是递归终止函数
+        if(e<node->e){
+            node->left = addRec(node->left,e);
+        }else if(e>node->e){
+            node->right = addRec(node->right,e);
+        }
+        return node;
+
+    }
+
+    bool contains(T e){
+        containsRec(root,e);
+    }
+
+private:
+    bool containsRec(Node* node,T e){
+        if (node == NULL) return false;
+        // 如果node == null 就是找不到,返回false；
+        // 如果e == node->e 说明找到了，返回true;
+        if (e == node->e){
+            return true;
+        }else if(e<node->e){
+            return containsRec(node->left,e);
+        }else{
+            return containsRec(node->right,e);
+        }
+    }
+
+
+public:
+    void PreOrder(){
+        PreOrderRec(root);
+    }
+
+    void MidOrder(){
+        MidOrderRec(root);
+    }
+
+    void TailOrder(){
+        TailOrderRec(root);
+    }
+
+private:
+    void PreOrderRec(Node* node,string name="root"){
+        if(node == NULL){
+            cout<<"NULL--> ";
+            return;} ;
+
+        //cout<<node->e<<" "<<name<<endl;
+        PrintNode(node,name);
+        PreOrderRec(node->left,"Left");
+        PreOrderRec(node->right,"Right");
+
+    }
+
+    void MidOrderRec(Node* node,string name="root"){
+        if(node == NULL){
+            cout<<"NULL--> ";
+            return;} ;
+
+        //cout<<node->e<<" "<<name<<endl;
+        MidOrderRec(node->left,"Left");
+        PrintNode(node,name);
+        MidOrderRec(node->right,"Right");
+    }
+
+    void TailOrderRec(Node* node,string name="root"){
+        if(node == NULL){
+            cout<<"NULL--> ";
+            return;} ;
+
+        //cout<<node->e<<" "<<name<<endl;
+        TailOrderRec(node->left,"Left");
+        TailOrderRec(node->right,"Right");
+        PrintNode(node,name);
+    }
+
+    void PrintNode(Node* node,string name){
+        cout<<node->e<<" "<<name<<"-->"<<endl;
+    }
+
+public:
+    void PreOrderLoop(){
+        stack<Node*> s = stack<Node*>();
+        s.push(root);
+        while (!s.empty()){
+            Node* cur = s.top();
+            s.pop();
+            cout<<cur->e<<endl;
+
+            if(cur->right!=NULL)
+                s.push(cur->right);
+            if(cur->left!=NULL)
+                s.push(cur->left);
+        }
+    }
+
+    void LevelLoop(){//bfs
+        queue<Node*> q = queue<Node*>();
+        q.push(root);
+        while(!q.empty()){
+            Node* cur = q.front();
+            q.pop();
+            cout<<cur->e<<endl;
+
+            if(cur->left!=NULL)
+                q.push(cur->left);
+            if(cur->right!=NULL)
+                q.push(cur->right);
+        }
+    }
+
+    T miniMum(){
+        if(size == 0){
+            throw "BST IS EMPTY";
+        }
+
+        return miniMumFind(root)->e;
+    }
+
+    T MaxMum(){
+        if(size == 0){
+            throw "BST IS EMPTY";
+        }
+
+        return MaxMumFind(root)->e;
+    }
+
+    T RemoveMin(){
+        T ret = miniMum();
+        root = removeMin(root);
+        return ret;
+    }
+
+    T RemoveMax(){
+        T ret = MaxMum();
+        root = removeMax(root);
+        return ret;
+    }
+
+private:
+
+    Node* removeMax(Node* node){
+        if(node->right == NULL){
+            Node* leftNode = node->left;
+            node->left = NULL;
+            size--;
+            return leftNode;//if leftNode is not NULL.right will be the new root;
+            // if leftNode is NULL, The minNode will be del
+        }
+    }
+    Node* removeMin(Node* node){
+        if(node->left == NULL){
+            Node* rightNode = node->right;
+            node->right = NULL;
+            size -- ;
+            return rightNode;//if rightNode is not NULL.right will be the new root;
+                                // if rightNode is NULL, The minNode will be del
+        }
+
+        node->left = removeMin(node->left);
+        return node;
+    }
+
+
+
+    Node* miniMumFind(Node* node){
+        if(node->left == NULL){
+            return node;
+        }
+        return miniMumFind(node->left);
+    }
+
+    Node* MaxMumFind(Node* node){
+        if(node->right == NULL){
+            return node;
+        }
+        return miniMumFind(node->right);
+    }
+
+
+
+public:
+    void Remove(T e){
+       root = reMoveRecNew(root,e);
+
+    }
+
+    void remove2(T e){
+        reMoveRecNew2(root,e);
+    }
+
+private:
+    Node* reMoveRecNew(Node* node,T e){
+
+        if(node == 0) return 0;
+
+
+        if(e<node->e){
+            node->left = reMoveRecNew(node->left,e);
+            return node;
+        }
+        else if(e>node->e){
+            node->right = reMoveRecNew(node->right,e);
+            return node;
+        }
+
+        else{//node.e == e
+            if(node->left == 0){
+                Node* rightNode = node->right;
+                node->right = 0;
+                size--;
+                return rightNode;
+            }//只有左子树
+            else if(node->right == 0){
+                Node* leftNode = node->left;
+                node->left = 0;
+                size--;
+                return leftNode;
+            }//只有右子树
+
+        }
+
+        Node* successor = miniMumFind(node->right);//拥有完整左右子树的node，需要找到合适的后继
+        successor->right = removeMin(node->right);
+        successor->left = node->left;
+
+        node->left = node->right = 0;
+
+        return successor;
+
+
+
+    }
+
+    void reMoveRecNew2(Node* node,T e){
+
+        if(node == 0) return ;
+
+
+        if(e<node->e){
+            reMoveRecNew(node->left,e);
+
+        }
+        else if(e>node->e){
+           reMoveRecNew(node->right,e);
+
+        }
+
+        else{//node.e == e
+            if(node->left == 0){
+                Node* rightNode = node->right;
+                node->right = 0;
+                size--;
+                return;
+            }//只有左子树
+            else if(node->right == 0){
+                Node* leftNode = node->left;
+                node->left = 0;
+                size--;
+                return;
+            }//只有右子树
+
+        }
+
+        Node* successor = miniMumFind(node->right);//拥有完整左右子树的node，需要找到合适的后继
+        successor->right = removeMin(node->right);
+        successor->left = node->left;
+
+        node->left = node->right = 0;
+
+        return;
+
+
+
+    }
+
+
+
+};
+
+#endif //DATASTRUCT2_BST_H
