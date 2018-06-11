@@ -1,0 +1,188 @@
+#ifndef DATASTRUCT_ARRAY_H
+#define DATASTRUCT_ARRAY_H
+
+
+#include<iostream>
+#include<cstdio>
+#include<cstring>
+#include <string>
+#include<cmath>
+#include<cstdlib>
+#include<algorithm>
+
+
+template <typename T>
+class Array {
+private:
+    T* data;
+    int size;
+    int capacity;
+
+public:
+    //构造函数，传入数组容量capacity
+    Array(int capacity){
+        this->capacity = capacity;
+        data = new T[capacity];
+        size = 0;
+    }
+    //默认构造函数
+    Array(){
+        this->capacity = 20;
+        data = new T[capacity];
+        size = 0;
+    }
+
+    ~Array(){
+        delete[] data;
+    };
+
+    int getSize(){
+        return size;
+    }
+
+    int getCapacity(){
+        return this->capacity;
+    }
+
+    bool isEmpty(){
+        return size==0;
+    }
+
+
+    void add(int index,T e){
+
+        if(index<0 || index >size){
+            throw "Add failed,Array index Wrong!index >0 || index < size";
+        }
+
+        if(size >=getCapacity()){
+            capacity = 2*capacity;
+            resize(capacity);
+        }
+
+        for(int i = size-1;i>=index;i--){
+            data[i+1]=data[i];
+        }
+
+        data[index]= e;
+        size++;
+    }
+
+    T Remove(int index){
+        T ret = data[index];
+        if(index<0 || index >size){
+            throw "Add failed,Array index Wrong!index >0 || index < size";
+        }
+
+        for(int i = index+1;i<size;i++){
+            data[i-1]=data[i];
+        }
+        size--;
+        //delete data[size];
+        //data[size]=NULL;
+        if(size<=getCapacity()/4 && getCapacity()/4!=0){
+            capacity = capacity/2;
+            resize(capacity);
+        }
+
+
+        return ret;
+    }
+
+    T RemoveFirst(){
+        return Remove(0);
+    }
+
+    T RemoveLast(){
+        return Remove(size-1);
+    }
+
+    //删除其中一个元素
+    void RemoveElemet(T e){
+        int index = find(e);
+        if(index!=-1){  Remove(index);
+        }
+    }
+
+    void addLast(T e ){
+
+        add(size,e);
+    }
+
+    void addFirst(T e){
+        add(0,e);
+    }
+
+    T get(int index){
+        if(index<0 || index >size){
+            throw "Add failed,Array index Wrong!index >0 || index < size";
+        }
+        return data[index];
+    }
+
+    T getLast(){
+        int newSize = size-1;
+        return get(newSize);
+    }
+
+    T getFirst(){
+        return get(0);
+    }
+
+    void set(int index,T e){
+        if(index<0 || index >size){
+            throw "Add failed,Array index Wrong!index >0 || index < size";
+        }
+        data[index] = e;
+    }
+
+    bool contains(T e){
+        for(int i = 0;i<size;i++){
+            if(data[i]==e)
+                return true;
+        }
+        return false;
+    }
+
+    int find(T e){
+        for(int i = 0;i<size;i++){
+            if(data[i]==e){
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    void toString(){
+        std::string newdata[capacity];
+        std::cout<<
+                 "Array: "+std::to_string(size)+
+                 ", capacity: "+std::to_string(capacity)<<std::endl;
+        newdata[0]="[";
+        for(int i=0;i<size;i++){
+            newdata[i+1]=std::to_string(data[i]);
+            if(i!=size-1){
+                newdata[i+1]=std::to_string(data[i])+", ";
+            }
+        }
+        newdata[size+1]="]";
+        for(int i=0;i<size+2;i++){
+            std::cout<<newdata[i]<<" ";
+        }
+        std::cout<<""<<std::endl;
+    }
+
+private:
+    void resize(int newCapacity){
+        T* newdata = new T[newCapacity];
+        for(int i = 0;i<size;i++){
+            newdata[i]=data[i];
+        }
+        data = newdata;
+
+    }
+
+};
+
+
+#endif //DATASTRUCT_ARRAY_H
