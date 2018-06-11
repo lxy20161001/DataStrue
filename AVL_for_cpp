@@ -1,0 +1,342 @@
+#ifndef AVLTREE_AVLTREE_H
+#define AVLTREE_AVLTREE_H
+
+#include <iostream>
+#include <cmath>
+#include <vector>
+
+using namespace std;
+
+template<typename K, typename V>
+class AVLTree {
+private:
+    class Node {
+    public:
+        K key;
+        V value;
+        Node *left;
+        Node *right;
+        int height;
+
+        Node(K key, V value) {
+            this->key = key;
+            this->value = value;
+            left = 0;
+            right = 0;
+            height = 1;
+        }
+
+        ~Node() {
+            delete  left;
+            delete  right;
+        }
+    };
+
+
+private:
+    Node *root;
+    int size;
+
+public:
+    AVLTree() {
+        root = 0;
+        size = 0;
+    }
+
+    ~AVLTree() {
+        delete root;
+    };
+
+    int getSize() {
+        return size;
+    }
+
+    bool isEmpty() {
+        return size == 0;
+    }
+
+    //判断是否二叉树
+    bool isBst() {
+        vector<K> *keys = new vector<K>{};
+        inOrder(root, keys);
+
+        for (int i = 1; i < keys->size(); i++) {
+            if (keys->at(i - 1) > keys->at(i)) {
+                return false;
+            }
+        }
+        return true;
+
+    }
+
+    //判断是否平衡二叉树
+    bool isBalanced() {
+        return isBalanced(root);
+    }
+
+private:
+    bool isBalanced(Node *node) {
+        //如果是node是空的，那么也是一个平衡二叉树
+        if (node == 0)return true;
+
+        int balanceFactor = getBalacneFactor(node);
+        
+        if (abs(balanceFactor) > 1) {
+            return false;
+        }
+        return isBalanced(node->left) && isBalanced(node->right);
+    }
+
+private:
+    void inOrder(Node *node, vector<K> *keys) {
+        if (node == 0) {
+            return;
+        }
+
+        inOrder(node->left, keys);
+        keys->push_back(node->key);
+        inOrder(node->right, keys);
+    }
+
+private:
+    int getHight(Node *node) {
+        if (node == 0) {
+            return 0;
+        }
+        return node->height;
+    }
+
+    int getBalacneFactor(Node *node) {
+        if (node == 0) return 0;
+        return getHight(node->left) - getHight(node->right);
+    }
+
+    Node *rightRotate(Node *y) {
+
+        Node *x = y->left;
+        Node *T3 = x->right;
+        //用两个新的节点暂时存放两个节点
+
+        x->right = y;
+        y->left = T3;
+        //以上是宣传代码的核心
+
+        //左右子树中高的一方height+1
+        y->height = max(getHight(y->left), getHight(y->right)) + 1;
+        x->height = max(getHight(x->left), getHight(x->right)) + 1;
+
+        return x;
+    }
+
+    Node *leftRotate(Node *y) {
+        Node *x = y->right;
+        Node *T2 = x->left;
+
+        x->left = y;
+        y->right = T2;
+
+        //左右子树中高的一方height+1
+        y->height = max(getHight(y->left), getHight(y->right)) + 1;
+        x->height = max(getHight(x->left), getHight(x->right)) + 1;
+
+        return x;
+
+    }
+
+public:
+    void add(K key, V value) {
+        root = add(root, key, value);
+    }
+
+    Node *add(Node *node, K key, V value) {
+        if (node == 0) {
+            size++;
+            return new Node(key, value);
+        } else if (key < node->key) {
+            node->left = add(node->left, key, value);
+        } else if (key > node->key) {
+            node->right = add(node->right, key, value);
+        } else {//node.key == key
+            node->value = value;
+        }
+        //更新height
+        node->height = 1 + max(getHight(node->left), getHight(node->right));
+
+        //计算平衡因子
+        int balanceFactor = getBalacneFactor(node);
+        if (abs(balanceFactor) > 1) {
+            cout << "unbalance:  " << balanceFactor << endl;
+        }
+
+        //左子树要比右子树要高，所以大于1
+        //LL
+        if (balanceFactor > 1 && getBalacneFactor(node->left) >= 0) {
+            return rightRotate(node);
+        }
+
+        //右子树要比左子树搞，所以小于-1
+        //RR
+        if (balanceFactor < -1 && getBalacneFactor(node->right) <= 0) {
+            return leftRotate(node);
+        }
+
+        //LR//左子树的右子树比左子树要大，破坏了平衡
+        if (balanceFactor > 1 && getBalacneFactor(node->left) < 0) {
+            node->left = leftRotate(node->left);
+            return rightRotate(node);
+        }
+
+        //RL
+        if (balanceFactor < -1 && getBalacneFactor(node->right) > 0) {
+            node->right = rightRotate(node->right);
+            return leftRotate(node);
+        }
+
+        return node;
+    }
+
+private:
+    Node *getNode(Node *node, K key) {
+        if (node == 0) return 0;
+        if (key == node->key) {
+            return node;
+        } else if (key < node->key) {
+            return getNode(node->left, key);
+        } else {
+            return getNode(node->right, key);
+        }
+
+    }
+
+public:
+    bool contains(K key) {
+        return getNode(root, key) != 0;
+    }
+
+    V get(K key) {
+        Node *node = getNode(root, key);
+        return node == 0 ? 0 : node->value;
+    }
+
+    void set(K key, V NewValue) {
+        Node *node = getNode(root, key);
+        if (node == 0) {
+
+        } else {
+            node->value = NewValue;
+        }
+    }
+
+    V remove(K key) {
+        //root = remove(root,key);
+        //return root->value;
+        Node *node = getNode(root, key);
+        if (node != 0) {
+            root = remove(root, key);
+            return node->value;
+        }
+        return 0;
+    }
+
+    Node *remove(Node *node, K key) {
+        if (node == 0) {
+            return 0;
+        }
+
+        Node *retNode;//承接所有将要返回的新的NODE的节点信息
+
+        if (node->key == key) {
+            retNode = node;
+        } else if (key < node->key) {
+            node->left = remove(node->left, key);
+            retNode = node;
+        } else if (key > node->key) {
+            node->right = remove(node->right, key);
+            retNode = node;
+        } else {
+
+            if (node->left == 0) {
+                Node *rightNode = node->right;
+                node->right = 0;
+                size--;
+                retNode = rightNode;
+            } else if (node->right == 0) {
+                Node *leftNode = node->left;
+                node->left = 0;
+                size--;
+                retNode = leftNode;
+            } else {
+                Node *successor = miniMumFind(node->right);//拥有完整左右子树的node，需要找到合适的后继
+                successor->right = remove(node->right, successor->key);
+                successor->left = node->left;
+
+                node->left = node->right = 0;
+
+                retNode = successor;
+            }
+        }
+
+        if(retNode == 0){
+            return 0;
+            //最终返回的retNode是空的，那么直接返回空，不需要判断是否平衡
+        }
+
+        retNode->height = 1 + max(getHight(retNode->left), getHight(retNode->right));
+
+        //计算平衡因子
+        int balanceFactor = getBalacneFactor(retNode);
+
+        //左子树要比右子树要高，所以大于1
+        //LL
+        if (balanceFactor > 1 && getBalacneFactor(retNode->left) >= 0) {
+            return rightRotate(retNode);
+        }
+
+        //右子树要比左子树搞，所以小于-1
+        //RR
+        if (balanceFactor < -1 && getBalacneFactor(retNode->right) <= 0) {
+            return leftRotate(retNode);
+        }
+
+        //LR//左子树的右子树比左子树要大，破坏了平衡
+        if (balanceFactor > 1 && getBalacneFactor(retNode->left) < 0) {
+            retNode->left = leftRotate(retNode->left);
+            return rightRotate(retNode);
+        }
+
+        //RL
+        if (balanceFactor < -1 && getBalacneFactor(retNode->right) > 0) {
+            retNode->right = rightRotate(retNode->right);
+            return leftRotate(retNode);
+        }
+
+        return retNode;
+
+    }
+
+    //Node* removeMin(Node* node){
+    //    if(node->left == 0){
+    //        Node* rightNode = node->right;
+    //        node->right = 0;
+    //        size -- ;
+    //        return rightNode;//if rightNode is not NULL.right will be the new root;
+    //        // if rightNode is NULL, The minNode will be del
+    //    }
+//
+    //    node->left = removeMin(node->left);
+    //    return node;
+    //}
+
+
+
+    Node *miniMumFind(Node *node) {
+        if (node->left == 0) {
+            return node;
+        }
+        return miniMumFind(node->left);
+
+
+    }
+};
+
+#endif //AVLTREE_AVLTREE_H
