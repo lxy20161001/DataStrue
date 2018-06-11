@@ -1,0 +1,165 @@
+
+
+#ifndef HEAP_MAXHEAP_H
+#define HEAP_MAXHEAP_H
+
+#include "Array.h"
+
+using namespace ::std;
+
+
+template<typename T>
+class MaxHeap {
+
+private:
+    Array<T> *Data;
+
+public:
+    MaxHeap(int Capacity) {
+        Data = new Array<T>(Capacity);
+    }
+
+    MaxHeap() {
+        Data = new Array<T>();
+    }
+
+    MaxHeap(T *arr,int n){
+        Data = new Array<T>(arr,n);
+
+        for(int i = parent(n-1);i>=0;--i){
+            siftDown(i);
+        }
+    }
+
+    ~MaxHeap() {
+        delete Data;
+    };
+
+    int Size() {
+        return Data->getSize();
+    }
+
+    bool isEmpty() {
+        return Data->isEmpty();
+    }
+
+    //判断父亲节点
+private:
+    int parent(int index) {
+        if (index == 0) {
+            throw "index=0 doesn't have parent";
+        }
+        return (index - 1) / 2;
+    }
+
+    int leftChild(int index) {
+        return (index * 2) + 1;
+    }
+
+    int rightChild(int index) {
+        return (index * 2) + 2;
+    }
+
+public:
+    void add(T e) {
+        Data->addLast(e);
+        siftUpRec(Data->getSize() - 1);
+    }
+
+    void siftUp(int k) {
+        while (k > 0 && Data->get(parent(k)) < Data->get(k)) {
+            Data->swap(k, parent(k));//把堆中元素调转
+            k = parent(k);//父节点的index返回给while，继续循环
+        }
+
+    }
+
+    void siftUpRec(int k) {
+        if (k > 0 && Data->get(parent(k)) < Data->get(k)) {
+            Data->swap(k, parent(k));
+            k = parent(k);
+            siftUpRec(k);
+        } else {
+            return;
+        }
+
+
+    }
+
+    T findMax() {
+        if (Data->getSize() == 0) {
+            throw "The heap is Empty!";
+        }
+        return Data->get(0);
+    }
+
+    T extractMax() {
+        T ret = findMax();
+        Data->swap(0, Data->getSize() - 1);
+        Data->RemoveLast();
+        siftDownRec(0);
+
+        return ret;
+    }
+
+private:
+    void siftDown(int k) {
+        while (leftChild(k) < Data->getSize()) {
+            int j = leftChild(k);//首先把index预设为左节点
+            if (j + 1 < Data->getSize() && Data->get(j + 1) > Data->get(j)) {
+                //如果J+1不大于DATA.GETSIZE的同事J+1的value大于J；那么J = 可以是右节点
+                j = rightChild(k);
+            }
+
+            if (Data->get(k) > Data->get(j)) {
+                //如果index对应的value大于J对应的value，说明已经下层到底了
+                break;
+            }
+
+
+            Data->swap(k, j);
+
+            k = j;
+
+        }
+    }
+
+    void siftDownRec(int k) {
+        if(leftChild(k) < Data->getSize()){
+            int j = leftChild(k);//首先把index预设为左节点
+            if (j + 1 < Data->getSize() && Data->get(j + 1) > Data->get(j)) {
+                //如果J+1不大于DATA.GETSIZE的同事J+1的value大于J；那么J = 可以是右节点
+                j = rightChild(k);
+            }
+            if (Data->get(k) > Data->get(j)) {
+                //如果index对应的value大于J对应的value，说明已经下层到底了
+                return;
+            }
+
+            Data->swap(k, j);
+            siftDownRec(j);
+        }
+        else{
+            return;
+        }
+    }
+
+    //去除堆中的最大元素，然后替换成元素E
+public:
+    T replace(T e){
+        T ret = findMax();
+
+        //把第一位元素也是最大的元素设置为参数e
+        Data->set(0,e);
+
+        siftDownRec(0);
+
+        return ret;
+
+    }
+
+
+};
+
+
+#endif //HEAP_MAXHEAP_H
