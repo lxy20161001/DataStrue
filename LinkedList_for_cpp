@@ -1,0 +1,281 @@
+
+
+#ifndef DATASTRUCT_LINKEDLIST_H
+#define DATASTRUCT_LINKEDLIST_H
+
+#include <iostream>
+
+using namespace std;
+
+template <typename T>
+class LinkedList {
+
+private:
+    class Node{
+    public:
+        T e;
+        Node* next;
+      
+    public:
+        Node(T e,Node* next){
+            this->e = e;
+            this->next = next;
+        }
+
+        Node(T e){
+            this->e = e;
+            this->next = 0;
+        }
+        Node(){
+            this->e = 0;
+            this->next = 0;
+        }
+
+        ~Node(){
+            delete next;
+        }
+
+        string Print(){
+            return to_string(e);
+        }
+    };
+
+private:
+
+    Node* dummyhead;//The First Node of The LinkedList
+    int size;
+public:
+    //Initialization the LinkedList
+    LinkedList(){
+        dummyhead =new Node(0,0);//The first Node is 0;
+        size = 0;
+    }
+
+    ~LinkedList(){
+        cout<<"delete dummyhead"<<endl;
+        delete dummyhead;
+    }
+
+    int getSize(){
+        return size;
+    }
+
+    bool isEmpty(){
+        return size==0;
+    }
+
+    void addFirst(T e){
+        //Node* node = new Node(e);//Initialization a NewNode
+        //node->next = head;//The NextNode = head;
+        //head = node;//The NewNode is new Head;
+
+        add(0,e);
+    }
+
+
+
+    void addLast(T e){
+        add(size,e);
+    }
+
+    // 在链表的index（0-base)位置添加新元素e
+    void add(int index,T e){
+        if(index <0 || index > size){
+            throw "Add failed,Illegal index!";
+        }
+
+
+        Node* prev = dummyhead;//首先设置prev和head是相同的起点
+            //index-1是插入位置的前一个元素
+        //这里的遍历是要找index前一个位置的来插入元素
+        for(int i=0;i<index;i++){
+                prev = prev->next;//没有到达index-1之前，prev=prev.next
+            }
+
+            //Node* node = new Node(e);
+            //node->next = prev->next;
+            //prev->next = node;
+            prev->next = new Node(e,prev->next);
+            size++;
+        }
+//递归版本
+    void addRec(int index , T e){
+        if(index <0 || index > size){
+            throw "Add failed,Illegal index!";
+        }
+        addRecc(0,index,e,dummyhead);
+    }
+//递归版本
+    void addRecc(int i,int index,T e,Node* node){
+
+        if(i == index){
+            node->next=new Node(e,node->next);
+            size++;
+            return;
+        }
+        addRecc(i+1,index,e,node->next);
+
+    }
+//递归版本
+    T getrec(int index){
+        if(index <0 || index >= size){
+            throw "update failed,Illegal index!";
+        }
+        Node* cur = dummyhead->next;
+        return getrecc(0,index,cur);
+    }
+//递归版本
+    T getrecc(int i ,int index,Node* cur){
+        if(i==index){
+            return cur->e;
+        }
+        return getrecc(i+1,index,cur->next);
+    }
+    //递归版本
+    T getFristrec(){
+        return getrec(0);
+    }
+
+
+    T get(int index){
+        if(index <0 || index >= size){
+            throw "update failed,Illegal index!";
+        }
+
+        //get 是要寻找真实的元素，所以遍历是从真正的0元素开始
+        Node* cur = dummyhead->next;
+        for(int i = 0;i<index;i++){
+            cur = cur->next;//按照index找到要get的元素
+        }
+
+        return cur->e;//cur是节点，里面包含了e和next两个属相
+    }
+
+    //获取当前第一个元素
+    T getFrist(){
+        return get(0);
+    }
+
+    T getLast(){
+        return get(size-1);
+    }
+
+    void set(int index,T e){
+        if(index <0 || index >= size){
+            throw "Set failed,Illegal index!";
+        }
+
+        Node* cur = dummyhead->next;
+        for(int i = 0;i<index;i++){
+            cur = cur->next;
+        }
+        cur->e = e;
+    }
+
+    bool contains(T e){
+        Node* cur = dummyhead->next;
+        //for(int i = 0; i < size;i++){
+        //    if(cur->e = e) return true;
+        //    cur = cur->next;
+        //}
+        //return false;
+        //while(cur!=0){
+        //    if(cur->e = e)return true;
+        //    cur = cur->next;
+        //}
+        //return false;
+
+        return containsRec(cur,e);
+    }
+
+    bool containsRec(Node* node,T e){
+        if (node == 0) return false;
+        // 如果node == 0 就是找不到,返回false；
+        // 如果e == node->e 说明找到了，返回true;
+        if (node->e==e){
+            return true;
+        }else{
+            return containsRec(node->next,e);
+        }
+
+
+    }
+
+    //删除链表元素(0-size)
+    T remove(int index){
+        if(index <0 || index >= size){
+            throw "Remove failed,Illegal index!";
+        }
+        Node* prev = dummyhead;
+        for(int i=0;i<index;i++){
+            prev = prev->next;
+        }
+
+        Node* retNode = prev->next;//retNode就是要删除的元素，prev.next
+        prev->next=retNode->next;//prev直接和retNode的下一个元素链接，等于将retNode绕过了；
+        retNode->next = 0;//绕过了要删除的元素，同时要删除元素的.next元素也必须变成0，避免内容错误
+
+        size --;//删除元素，SIZE减少
+        return retNode->e;
+
+    }
+//递归版本
+    T removeRec(int index){
+        if(index <0 || index >= size){
+            throw "Remove failed,Illegal index!";
+        }
+        Node* prev = dummyhead;
+        return removeRecc(0,index,prev);
+    }
+//递归版本
+    T removeRecc(int i,int index,Node* prev){
+        if(i == index){
+            Node* retNode = prev->next;
+            prev->next = retNode->next;
+            retNode->next = 0;
+            size -- ;
+            return retNode->e;
+        }
+        return removeRecc(i+1,index,prev->next);
+    }
+    //递归版本
+    T removeFirstRec(){
+        return removeRec(0);
+    }
+
+    T removeFirst(){
+        return remove(0);
+    }
+
+    T removeLast(){
+        return remove(size-1);
+    }
+
+    void PrintLinkedList(){
+        std::string data[this->size+5];
+        //Node* cur = dummyhead->next;
+        int NewSize = 0;
+        //while(cur!=0){
+        //    data[NewSize] = cur->Print()+"->";
+        //    cur = cur->next;
+        //    NewSize++;
+        //}
+        for(Node* cur = dummyhead->next;cur!=0;cur=cur->next,NewSize++){
+            data[NewSize]=cur->Print()+"->";
+        }
+
+        data[this->size]="NULL";
+
+        for(int i = 0;i<this->size+2;i++){
+            cout<<data[i]<<"";
+
+        }
+        cout<<""<<endl;
+    }
+
+
+
+};
+
+
+#endif //DATASTRUCT_LINKEDLIST_H
