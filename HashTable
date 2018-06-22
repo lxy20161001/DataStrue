@@ -1,0 +1,97 @@
+//
+// Created by john on 2018-6-20.
+//请自行下载RBTree.h
+//
+#ifndef HASHSETKEY_HASHCODETEST_H
+#define HASHSETKEY_HASHCODETEST_H
+
+#include <iostream>
+#include <string>
+#include "RBTree.h"
+
+
+using namespace std;
+
+template<typename K, typename V>
+class HashTable {
+
+public:
+
+    int M;
+    int size;
+    RBtree<K, V> *hashTable[];
+
+
+public:
+    explicit HashTable(int NewM) {
+        this->M = NewM;
+        *hashTable = new RBtree<K, V>[this->M]{};
+        size = 0;
+        for (int i = 0; i < this->M; i++) {
+            hashTable[i] = new RBtree<K, V>();
+        }
+    }
+
+    HashTable() {
+        size = 0;
+        this->M = 97;
+        *hashTable = new RBtree<K, V>[M]{};
+        for (int i = 0; i < M; i++) {
+            hashTable[i] = new RBtree<K, V>();
+        }
+
+
+    }
+
+private:
+    int hash(K key) {
+        return (hashCode(key) & 0x7fffffff) % M;
+    }
+
+    int hashCode(K name) {
+        std::hash<K> hashName;
+
+        return hashName(name);
+    }
+
+public:
+
+    int getSize() {
+        return size;
+    }
+
+    void add(K key, V value) {
+        RBtree<K, V> *map = hashTable[hash(key)];
+        if (map->contains(key)) {
+            map->add(key, value);
+        } else {
+            map->add(key, value);
+            size++;
+        }
+    }
+
+    V remove(K key) {
+
+    }
+
+    void set(K key, V value) {
+        RBtree<K, V> *map = hashTable[hash(key)];
+        if (!map->contains(key)) {
+            throw key + "doesn't exist";
+        }
+
+        map->add(key, value);
+    }
+
+    bool contains(K key) {
+        return hashTable[hash(key)]->contains(key);
+    }
+
+    V get(K key) {
+        return hashTable[hash(key)]->get(key);
+    }
+
+
+};
+
+#endif //HASHSETKEY_HASHCODETEST_H
