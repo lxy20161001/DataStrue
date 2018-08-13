@@ -124,7 +124,7 @@ private:
         node->color = RED;//cause node->color is the left node of x,and
         // is 3-point-node;
 
-        return node;
+        return x;
     }
 
     Node* rightRotate(Node* node){
@@ -137,7 +137,7 @@ private:
 
         node->color = RED;
 
-        return node;
+        return x;
     }
 
 public:
